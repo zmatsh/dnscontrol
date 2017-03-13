@@ -9,9 +9,11 @@ import (
 	"net"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/StackExchange/dnscontrol/transform"
 	"github.com/miekg/dns"
+	"github.com/miekg/dns/dnsutil"
 )
 
 const DefaultTTL = uint32(300)
@@ -71,6 +73,9 @@ type RecordConfig struct {
 }
 
 func (r *RecordConfig) String() string {
+	if r == nil {
+		return "?"
+	}
 	content := fmt.Sprintf("%s %s %s %d", r.Type, r.NameFQDN, r.Target, r.TTL)
 	if r.Type == "MX" {
 		content += fmt.Sprintf(" priority=%d", r.Priority)
@@ -83,7 +88,6 @@ func (r *RecordConfig) String() string {
 
 /// Convert RecordConfig -> dns.RR.
 func (r *RecordConfig) RR() dns.RR {
-
 	// Note: The label is a FQDN ending in a ".".  It will not put "@" in the Name field.
 
 	// NB(tlim): An alternative way to do this would be
@@ -129,11 +133,45 @@ func (r *RecordConfig) RR() dns.RR {
 	return rc
 }
 
+func RRToRecord(rr dns.RR, origin string) (*RecordConfig, error) {
+	// Convert's dns.RR into our native data type (models.RecordConfig).
+	// Records are translated directly with no changes.
+	header := rr.Header()
+	rc := &RecordConfig{}
+	rc.Type = dns.TypeToString[header.Rrtype]
+	rc.NameFQDN = strings.ToLower(strings.TrimSuffix(header.Name, "."))
+	rc.Name = strings.ToLower(dnsutil.TrimDomainName(header.Name, origin))
+	rc.TTL = header.Ttl
+	switch v := rr.(type) {
+	case *dns.A:
+		rc.Target = v.A.String()
+	case *dns.AAAA:
+		rc.Target = v.AAAA.String()
+	case *dns.CNAME:
+		rc.Target = v.Target
+	case *dns.MX:
+		rc.Target = v.Mx
+		rc.Priority = v.Preference
+	case *dns.NS:
+		rc.Target = v.Ns
+	case *dns.SOA:
+		rc.Target = fmt.Sprintf("%v %v %v %v %v %v %v",
+			v.Ns, v.Mbox, v.Serial, v.Refresh, v.Retry, v.Expire, v.Minttl)
+	case *dns.TXT:
+		rc.Target = strings.Join(v.Txt, " ")
+	default:
+		return nil, fmt.Errorf("unimplemented zone record type=%s (%v)", rc.Type, rr)
+	}
+	return rc, nil
+}
+
 type Nameserver struct {
 	Name   string `json:"name"` // Normalized to a FQDN with NO trailing "."
 	Target string `json:"target"`
 }
 
+// StringsToNameservers is a convenience funciton to build a list of nameservers from a list of strings.
+// IP addresses will be empty
 func StringsToNameservers(nss []string) []*Nameserver {
 	nservers := []*Nameserver{}
 	for _, ns := range nss {
@@ -142,12 +180,28 @@ func StringsToNameservers(nss []string) []*Nameserver {
 	return nservers
 }
 
+type Records []*RecordConfig
+
+type RecordKey struct {
+	Type string
+	Name string
+}
+
+func (r Records) Grouped() map[RecordKey]Records {
+	m := map[RecordKey]Records{}
+	for _, r := range r {
+		key := RecordKey{r.Type, r.Name}
+		m[key] = append(m[key], r)
+	}
+	return m
+}
+
 type DomainConfig struct {
 	Name         string            `json:"name"` // NO trailing "."
 	Registrar    string            `json:"registrar"`
 	DNSProviders map[string]int    `json:"dnsProviders"`
 	Metadata     map[string]string `json:"meta,omitempty"`
-	Records      []*RecordConfig   `json:"records"`
+	Records      Records           `json:"records"`
 	Nameservers  []*Nameserver     `json:"nameservers,omitempty"`
 	KeepUnknown  bool              `json:"keepunknown"`
 }

@@ -29,6 +29,8 @@ import (
 	"github.com/miekg/dns"
 	"github.com/miekg/dns/dnsutil"
 
+	"strconv"
+
 	"github.com/StackExchange/dnscontrol/models"
 	"github.com/StackExchange/dnscontrol/providers"
 	"github.com/StackExchange/dnscontrol/providers/diff"
@@ -58,50 +60,38 @@ var bindBaseDir = flag.String("bindtree", "zones", "BIND: Directory that stores 
 
 //var bindSkeletin = flag.String("bind_skeletin", "skeletin/master/var/named/chroot/var/named/master", "")
 
-func rrToRecord(rr dns.RR, origin string, replace_serial uint32) (models.RecordConfig, uint32) {
-	// Convert's dns.RR into our native data type (models.RecordConfig).
-	// Records are translated directly with no changes.
+func rrToRecord(rr dns.RR, origin string, replace_serial uint32) (*models.RecordConfig, uint32) {
 	// If it is an SOA for the apex domain and
 	// replace_serial != 0, change the serial to replace_serial.
 	// WARNING(tlim): This assumes SOAs do not have serial=0.
 	// If one is found, we replace it with serial=1.
-	var old_serial, new_serial uint32
-	header := rr.Header()
-	rc := models.RecordConfig{}
-	rc.Type = dns.TypeToString[header.Rrtype]
-	rc.NameFQDN = strings.ToLower(strings.TrimSuffix(header.Name, "."))
-	rc.Name = strings.ToLower(dnsutil.TrimDomainName(header.Name, origin))
-	rc.TTL = header.Ttl
-	switch v := rr.(type) {
-	case *dns.A:
-		rc.Target = v.A.String()
-	case *dns.AAAA:
-		rc.Target = v.AAAA.String()
-	case *dns.CNAME:
-		rc.Target = v.Target
-	case *dns.MX:
-		rc.Target = v.Mx
-		rc.Priority = v.Preference
-	case *dns.NS:
-		rc.Target = v.Ns
-	case *dns.SOA:
-		old_serial = v.Serial
-		if old_serial == 0 {
-			// For SOA records, we never return a 0 serial number.
-			old_serial = 1
-		}
-		new_serial = v.Serial
-		if rc.Name == "@" && replace_serial != 0 {
-			new_serial = replace_serial
-		}
-		rc.Target = fmt.Sprintf("%v %v %v %v %v %v %v",
-			v.Ns, v.Mbox, new_serial, v.Refresh, v.Retry, v.Expire, v.Minttl)
-	case *dns.TXT:
-		rc.Target = strings.Join(v.Txt, " ")
-	default:
-		log.Fatalf("Unimplemented zone record type=%s (%v)\n", rc.Type, rr)
+	rc, err := models.RRToRecord(rr, origin)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return rc, old_serial
+	if rc.Type == "SOA" {
+		//split soa to parts, modify serial and reconstruct
+		parts := strings.Split(rc.Target, " ")
+		if len(parts) != 7 {
+			return rc, 0
+		}
+		os, err := strconv.ParseUint(parts[2], 10, 32)
+		if err != nil {
+			return rc, 0
+		}
+		oldSerial := uint32(os)
+		if oldSerial == 0 {
+			oldSerial = 1
+		}
+		newSerial := oldSerial
+		if rc.Name == "@" && replace_serial != 0 {
+			newSerial = replace_serial
+		}
+		parts[2] = fmt.Sprint(newSerial)
+		rc.Target = strings.Join(parts, " ")
+		return rc, oldSerial
+	}
+	return rc, 0
 }
 
 func makeDefaultSOA(info SoaInfo, origin string) *models.RecordConfig {
@@ -184,10 +174,10 @@ func (c *Bind) GetDomainCorrections(dc *models.DomainConfig) ([]*models.Correcti
 					old_serial = serial
 					new_serial = generate_serial(old_serial)
 					// Regenerate with new serial:
-					*soa_rec, _ = rrToRecord(x.RR, dc.Name, new_serial)
-					rec = *soa_rec
+					soa_rec, _ = rrToRecord(x.RR, dc.Name, new_serial)
+					rec = soa_rec
 				}
-				foundRecords = append(foundRecords, &rec)
+				foundRecords = append(foundRecords, rec)
 			}
 		}
 	}
