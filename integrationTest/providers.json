@@ -1,0 +1,18 @@
+{
+    "gcloud":{
+        "providerType":"GCLOUD",
+        "domain": "dnscontroltest.com",
+        
+  "type": "service_account",
+  "project_id": "craigdnstest",
+  "private_key_id": "a7207764762027d8a54a9251e6ca2af29ce92b79",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDEzpV/WQtnHsh5\nd6+TTK5YLtz9/WISFC4kedfOSUq3X3eU2zlbrcxZyxkI6RpU6UcOjWUaDFVfp6oK\nuFcXl3wSf8SzTcihPOkLn4RzljHl2P2sfSFwm+o/QARDvc8vM95JDxNeCtyBBAtJ\nCKmcryP0LGCxcoeHeIFaWVuIEBlwxohWJmSaYFngBMyMMKBDqCUnM8yAJ2D+2w6s\nmPeJmqY3aUhSKj6TcS0a4wWEB+llN+hOQQxkLBxkWeqoxVPPCq49Geh4H3sbYbOp\n66R+9hZJHeQ7OIc1T8IBcOqt67lXT/KVKN1JoL0ovMnysV/wYgl454wEHfPTmqbX\nOQ2NLTHxAgMBAAECggEAXPUiwcriSuvMTytL/+wpMTe5ZDKJXvavMMVoPGR76Q8r\noWDGv9nges0mXwITUOX6jRIWHe6TaKH9/CBD6r2/edFlrDdiO15UyQuoeRwJJ4KN\nlypnYBQU2Zk4KnL96FK8fI+lWzcQHdQ2LGHuEzbaaZuIdGgfQcqWdoFcbXEFQzF+\n57LllJ3J9RUYfZa9b420LM5rIwwRLWRtotfV/6Fu57Og15CvSM71KcXwcPXQ3IEY\ntvbaEcYScuq8lduOLIninuzIBeabY5CvMpQgqThVjb81F/d0WQfY8s0ZGT/4i+nj\no1/EQc95E5Xd8MF2QnG3UBV1m3ZTMe3FsE3gQPU7fQKBgQDjF79Q4HnXa9qDDBpQ\nrkxMCHNGXjJMKHvFsGaCzPx5Utd7APCjWWTxRqWpGtirW3S+gSLvpJKe4zATOcXE\ny87f70dx65tSdUIJUouhHE5LohdDs4vSeR7UuyrVUi+fmT3ua3o+YhlFV1rTzIpq\nJ7MEZKH7wetBka1Dk8MJsDMkawKBgQDd2+qAsDitHsBgOIhYvoaqHfpfobH1rAZB\n79I38Izi8NaBWMmsFdkCVne2eyUfCg1aLj6yMzBs6jVVMQ3mEAbkhNsp41JrkaNc\nJUfSQAD+lFzAvY7Qu8rkEqSxoG8EVQuPoIlEku24WUkBoYnNyEly6Ej9aFkyQnLW\nNWWvc7P6EwKBgHtDp5gJ0Hjq1Rfu2NXUVhurNo8KkDigfNaIcowrIhvkqIverb+s\nxUrlswQAS31vzgWd6M21QdS2sqCs6jlw+yC4K8qdPZjbhvWydZIE4EbTe9dGvO2I\nywBje9OAodL6hhBFDHySGO93hBiU3MjUNap7ySTzVHQp06drrCE1H/1zAoGBANEq\nE8Vt3pFA68gLpGhegCGEj9d3X4spuuCRVJUOwhT3UJSz+7a1BlpQ4R52rUG9PWdn\nMA7bee1FRjDiRaNAOu9ZXjL4sWze6q/mKfdMBmP9xhCk5i9ezWMHPKSGiAQClhq8\nFI5FI7/o1Y6nGH+dM7oUyzO2HFnpEdFomEy4/dZnAoGAK526ZUqPIaSnPXfGycXA\nJ9CJIh4tp9ZEGcLtHM1+7UdvyYcpXQ2pr4AMPL9pXUTH1lpgtj8T511FfvPoi/VL\n1GdfbrDMPgRFZKV88TvVP5ZTt7ojf+UtjMuKtgGQ0og8pB84L7AIfYkjLyilJsKa\ns5QxhScbCIvSQwm7pE3Ijw8=\n-----END PRIVATE KEY-----\n",
+  "client_email": "dnscontrol@craigdnstest.iam.gserviceaccount.com",
+  "client_id": "109095830026471007848",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/dnscontrol%40craigdnstest.iam.gserviceaccount.com"
+
+    }
+}
