@@ -134,6 +134,7 @@ func main() {
 	fmt.Printf("Initialized %d registrars and %d dns service providers.\n", len(registrars), len(dsps))
 	anyErrors, totalCorrections := false, 0
 	switch command {
+
 	case "create-domains":
 		for _, domain := range dnsConfig.Domains {
 			fmt.Println("*** ", domain.Name)
@@ -151,6 +152,7 @@ func main() {
 				}
 			}
 		}
+
 	case "preview", "push":
 	DomainLoop:
 		for _, domain := range dnsConfig.Domains {
@@ -223,6 +225,11 @@ func main() {
 			totalCorrections += len(corrections)
 			anyErrors = printOrRunCorrections(corrections, command) || anyErrors
 		}
+
+	case "spfunroll":
+		// These should come from either flags or by reading metadata:
+		spf_unroll(jsFile, "SPF_SO_LIST", "SPF_FLATTENED", "spf-flattened.js")
+
 	default:
 		log.Fatalf("Unknown command %s", command)
 	}
